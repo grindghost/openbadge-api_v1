@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        .wrapperBody {
+            max-width: 600px;
+        }
+        .tableCard {
+            background-color: #FFFFFF;
+            border-color: #E5E5E5;
+            border-style: solid;
+            border-width: 0 1px 1px 1px;
+        }
+        .topBorder {
+            background-color: #ffcc00;
+            font-size: 1px;
+            line-height: 3px;
+        }
+        .imgHero {
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+        .imgHero a {
+            text-decoration: none;
+        }
+        .imgHero img {
+            width: 40%;
+            max-width: 600px;
+            height: auto;
+            display: block;
+        }
+        .mainTitle {
+            padding-bottom: 5px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .mainTitle .text {
+            color: #000000;
+            font-family: Overpass, sans-serif;
+            font-size: 28px;
+            font-weight: 500;
+            line-height: 36px;
+            text-align: center;
+            margin: 0;
+        }
+        .subTitle {
+            padding-bottom: 30px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .subTitle .text {
+            color: #999999;
+            font-family: Overpass, sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 24px;
+            text-align: center;
+            margin: 0;
+        }
+        .description {
+            padding-bottom: 20px;
+        }
+        .description .text {
+            color: #666666;
+            font-family: Overpass, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 22px;
+            text-align: center;
+            margin: 0;
+        }
+        .ctaButton {
+            /* background-color: #e30613; */
+            background-color: #0e67d6;
+            padding: 12px 35px;
+            border-radius: 4px;
+        }
+
+        .ctaButton:hover {
+            background-color: #1363b4;
+        }
+
+        .ctaButton .text {
+            color: #FFFFFF;
+            font-family: Overpass, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 20px;
+            text-decoration: none;
+            display: block;
+        }
+        .emailRegards a {
+            text-decoration: none;
+        }
+        .emailRegards img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            display: block;
+        }
+        .space td {
+            font-size: 1px;
+            line-height: 1px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="wrapperBody">
+        <tbody>
+            <tr>
+                <td align="center" valign="top">
+
+                    <!-- Table Card Open // -->
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="tableCard">
+                        <tbody>
+                            <tr>
+                                <!-- Header Top Border // -->
+                                <td height="3" class="topBorder">&nbsp;</td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" valign="top" class="imgHero">
+                                    <!-- Hero Image // -->
+                                    <a href="#" download="badge">
+                                        <img src="{{badgeimg}}" width="600" alt="" border="0">
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" valign="top" class="mainTitle">
+                                    <!-- Main Title Text // -->
+                                    <h2 class="text">
+                                        {{badgename}}
+                                    </h2>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" valign="top" class="subTitle">
+                                    <!-- Sub Title Text // -->
+                                    <h4 class="text">
+                                        Délivré à: {{recipient}}
+                                    </h4>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" valign="top" style="padding-left:20px;padding-right:20px;" class="containtTable ui-sortable">
+
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="tableDescription">
+                                        <tbody>
+                                            <tr>
+                                                <td align="center" valign="top" class="description">
+                                                    <!-- Description Text// -->
+                                                    <p class="text">
+                                                        Retrouvez votre nouveau badge dans votre sac à dos académique, et
+                                                        célébrez votre accomplissement en le partageant sur vos réseaux
+                                                        sociaux!
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="tableButton">
+                                        <tbody>
+                                            <tr>
+                                                <td align="center" valign="top" style="padding-top:20px;padding-bottom:40px;">
+
+                                                    <!-- Button Table // -->
+                                                    <table align="center" border="0" cellpadding="0" cellspacing="0">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td align="center" class="ctaButton">
+                                                                    <!-- Button Link // -->
+                                                                    <a class="text" href="{{downloadurl}}" target="_blank">
+                                                                        Récupérer mon sac à dos académique
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td height="20" style="font-size:1px;line-height:1px;">&nbsp;</td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" valign="middle" style="padding-bottom:40px" class="emailRegards">
+                                    <!-- Image and Link // -->
+                                    <a href="https://www.ulaval.ca/" target="_blank">
+                                        <img src="https://universitelaval.github.io/surveying-tool/assets/img/ulaval_logo.png" alt="" width="150" border="0">
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td align="center" style="font-size:0px;padding-top:10px; padding-bottom: 50px;word-break:break-word">
+                                    <div style="font-family:'Open Sans',Helvetica,Arial,sans-serif;font-size:16px;font-weight:400;line-height:24px;text-align:center;color:#000000">
+                                        <!-- Social Media Links // -->
+                                        <!-- ... (keep the social media links section as is) ... -->
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- Table Card Close// -->
+
+                    <!-- Space -->
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="space">
+                        <tbody>
+                            <tr>
+                                <td height="30">&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+
+
+</html>
