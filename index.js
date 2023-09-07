@@ -681,6 +681,8 @@ const generateHtmlGrid = (badges, username, user_points) => {
 }
 
 const htmlToPdf = async (html) => {
+  console.log(puppeteer.executablePath())
+  
   const browser = await puppeteer.launch({
     args: [
       '--no-sandbox',
