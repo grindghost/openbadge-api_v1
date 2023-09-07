@@ -13,6 +13,8 @@ require('dotenv').config()
 // https://www.benmvp.com/blog/initializing-firebase-admin-node-sdk-env-vars/
 
 const puppeteer = require('puppeteer');
+console.log("👽 Puppeteer executable path:", puppeteer.executablePath());
+
 const { PDFDocument, PDFName } = require('pdf-lib');
 const fetch = require('node-fetch');
 
