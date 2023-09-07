@@ -963,6 +963,8 @@ app.get('/api/downloadBackpack', async (req, res) => {
     };    
   }
 
+  console.log('👽', puppeteer.executablePath())
+
   const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
   const gridPdf = await htmlToPdf(htmlGrid);
   // const headerImg = await extractHeaderImage(htmlGrid);
