@@ -77,6 +77,7 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     const projectSnapshot = await projectRef.once('value');
     const projectData = projectSnapshot.val();
     console.log(projectData);
+    console.log('👽', puppeteer.executablePath())
 
     // Get the targeted badge and course
     const badgeId = projectData.badgeClass;
@@ -681,8 +682,8 @@ const generateHtmlGrid = (badges, username, user_points) => {
 }
 
 const htmlToPdf = async (html) => {
-
   const browser = await puppeteer.launch({
+    executablePath: '.cache/puppeteer/chrome/mac-116.0.5845.96/chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -962,8 +963,6 @@ app.get('/api/downloadBackpack', async (req, res) => {
      'assertion': badge.assertion
     };    
   }
-
-  console.log('👽', puppeteer.executablePath())
 
   const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
   const gridPdf = await htmlToPdf(htmlGrid);
