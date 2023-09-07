@@ -13,7 +13,6 @@ require('dotenv').config()
 // https://www.benmvp.com/blog/initializing-firebase-admin-node-sdk-env-vars/
 
 const puppeteer = require('puppeteer');
-console.log("👽 Puppeteer executable path:", puppeteer.executablePath());
 
 const { PDFDocument, PDFName } = require('pdf-lib');
 const fetch = require('node-fetch');
@@ -267,9 +266,11 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
 
         // Send confirmation email
         // Create the url to download the backpack in the email
+        /*
         const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
 
         SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
+        */
 
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });
