@@ -682,7 +682,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
 
 const htmlToPdf = async (html) => {
   console.log(puppeteer.executablePath())
-  
+
   const browser = await puppeteer.launch({
     args: [
       '--no-sandbox',
@@ -726,7 +726,7 @@ const extractHeaderImage = async (html) => {
   return screenshot;
 };
 
-async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, header_img) {
+async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers) {
 
   // Step 1: Load the first PDF containing the cover and the table of contents
     const PdfUrl = 'https://www.dropbox.com/scl/fi/v21d3l1andv6b8vn0qrjq/backpack.pdf?rlkey=qa2wuud56pomucf7vm4ni2jsf&raw=true';
@@ -752,6 +752,7 @@ async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, 
     }
 
     // Step 2: Insert header Image into PDF
+    /* 
     const image = await pdfDoc.embedPng(header_img);
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
@@ -763,7 +764,7 @@ async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, 
     const aspectRatio = image.height / image.width;
     const newHeight = pageWidth * aspectRatio;
 
-    /*     
+        
     firstPage.drawImage(image, {
       x: 0,
       y: 678, // Adjust the y-coordinate to place the image correctly
@@ -968,8 +969,10 @@ app.get('/api/downloadBackpack', async (req, res) => {
 
   const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
   const gridPdf = await htmlToPdf(htmlGrid);
-  const headerImg = await extractHeaderImage(htmlGrid);
-  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, headerImg);
+  // const headerImg = await extractHeaderImage(htmlGrid);
+  // const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, headerImg);
+  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges);
+
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'attachment; filename=backpack.pdf');
@@ -1014,8 +1017,8 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
 
   const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
   const gridPdf = await htmlToPdf(htmlGrid);
-  const headerImg = await extractHeaderImage(htmlGrid);
-  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, headerImg);
+  // const headerImg = await extractHeaderImage(htmlGrid);
+  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges);
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'attachment; filename=backpack.pdf');
