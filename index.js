@@ -681,7 +681,15 @@ const generateHtmlGrid = (badges, username, user_points) => {
 }
 
 const htmlToPdf = async (html) => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--single-process',
+      '--no-zygote',
+    ],
+    executablePath: puppeteer.executablePath(),
+  });
   const page = await browser.newPage();
   await page.setContent(html);
   const pdf = await page.pdf({ format: 'letter', printBackground: true });
@@ -700,7 +708,7 @@ const extractHeaderImage = async (html) => {
     ],
     executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
   }); */
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({});
   const page = await browser.newPage();
   await page.setContent(html);
 
