@@ -168,11 +168,6 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
         // Else, return the assertion data (and make sure the assertion is not revoked)  
         await db.ref(`assertions/${assertionId}/revoked`).set(false);
 
-        // Create the url to download the backpack in the email
-        const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
-
-        SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
-
         return res.status(409).json({ error: 'User already has the badge', assertion: assertionData, badgeImageUrl: badgeData.image });
     }
 
@@ -269,8 +264,10 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     }
 
         // Send confirmation email
-        // SendEmail(email, badgeInfos.badgeurl, badgeInfos['badgeclass'], forceDownloadURL, userName)
-        SendEmail(userData.email, badgeData.image, badgeData.name, assertionData.verify.url, userData.name);
+        // Create the url to download the backpack in the email
+        const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
+
+        SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
 
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });
@@ -681,15 +678,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
 }
 
 const htmlToPdf = async (html) => {
-  const browser = await puppeteer.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--single-process',
-      '--no-zygote',
-    ],
-    executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
-  });
+  const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.setContent(html);
   const pdf = await page.pdf({ format: 'letter', printBackground: true });
@@ -699,7 +688,7 @@ const htmlToPdf = async (html) => {
 
 const extractHeaderImage = async (html) => {
   // Step 1: Convert HTML to Image
-  const browser = await puppeteer.launch({
+/*   const browser = await puppeteer.launch({
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -707,7 +696,8 @@ const extractHeaderImage = async (html) => {
       '--no-zygote',
     ],
     executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
-  });
+  }); */
+  const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.setContent(html);
 
