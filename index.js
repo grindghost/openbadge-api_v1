@@ -670,7 +670,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
     }).join('')}
     </div>
     
-    <div class="footer">Copyright, 2023, Université Laval.</div>
+    <div class="footer">Développé pour l'Université Laval.</div>
     </body>
     </html>
   `;
