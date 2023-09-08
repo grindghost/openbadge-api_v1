@@ -271,8 +271,9 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // Create the url to download the backpack in the email
     // const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
 
-    const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
-    console.log("bakedBadgePNG", bakedBadgePNG);
+    // Try to bake the badge before sending it to email (send a baked version)
+    // const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
+
     // Generate a unique token
     const uniqueToken = crypto.randomBytes(16).toString('hex');
 
@@ -285,7 +286,7 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // Create the url to download the backpack in the email
     const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${uniqueToken}&uid=${uid}`;
 
-    await SendEmail(userData.email, bakedBadgePNG, badgeData.name, download_backpack_url, userData.name);
+    await SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
         
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });
