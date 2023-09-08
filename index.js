@@ -831,24 +831,10 @@ async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, 
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 }
 
+
 function formatDateToFrench(isoDate) {
   const date = new Date(isoDate);
-
-  const options = { 
-    year: '2-digit', 
-    month: '2-digit', 
-    day: '2-digit', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    hour12: false, 
-    timeZone: 'America/Toronto' 
-  };
-
-  return date.toLocaleString('fr-CA', options).replace(',', ' à').replace(' ', '/');
-}
-
-function __formatDateToFrench(isoDate) {
-  const date = new Date(isoDate);
+  date.setHours(date.getHours() - 4);
 
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
@@ -867,6 +853,7 @@ function _formatDateToFrench(isoDate) {
   ];
 
   const date = new Date(isoDate);
+  date.setHours(date.getHours() - 4);
 
   const day = date.getDate();
   const month = monthsInFrench[date.getMonth()];
