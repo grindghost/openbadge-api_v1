@@ -992,6 +992,8 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
 
   const { token, uid } = req.query;
 
+  const db = admin.database();
+
   // Verify the token
   const tokenData = await db.ref(`users/${uid}/tokens/${token}`).once('value').then(snapshot => snapshot.val());
 
