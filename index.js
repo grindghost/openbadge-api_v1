@@ -681,7 +681,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
 }
 
 const htmlToPdf = async (html) => {
-  const browser = await puppeteer.launch({
+  const browser = await puppeteer.connect({
     browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
     /* args: [
       '--no-sandbox',
