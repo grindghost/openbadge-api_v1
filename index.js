@@ -834,6 +834,22 @@ async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, 
 function formatDateToFrench(isoDate) {
   const date = new Date(isoDate);
 
+  const options = { 
+    year: '2-digit', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    hour12: false, 
+    timeZone: 'America/Toronto' 
+  };
+
+  return date.toLocaleString('fr-CA', options).replace(',', ' à').replace(' ', '/');
+}
+
+function __formatDateToFrench(isoDate) {
+  const date = new Date(isoDate);
+
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
   const year = String(date.getFullYear()).slice(-2); // Get the last two digits of the year
