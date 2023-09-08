@@ -266,12 +266,11 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
 
         // Send confirmation email
         // Create the url to download the backpack in the email
-        /*
+        
         const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
 
         SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
-        */
-
+        
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });
 
