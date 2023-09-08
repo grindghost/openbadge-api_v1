@@ -271,6 +271,8 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // Create the url to download the backpack in the email
     // const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
 
+    const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
+
     // Generate a unique token
     const uniqueToken = crypto.randomBytes(16).toString('hex');
 
@@ -283,7 +285,7 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // Create the url to download the backpack in the email
     const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${uniqueToken}&uid=${uid}`;
 
-    await SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
+    await SendEmail(userData.email, bakedBadgePNG, badgeData.name, download_backpack_url, userData.name);
         
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });
@@ -406,6 +408,29 @@ async function getAllBadgesForUser(userId) {
     }
     return userBadgesBackpack;
 }
+
+const bakeBadgeForEmail = async (emissionData, badgeImageUrl) => {
+  try {
+    const { data } = await axios.get(badgeImageUrl, { responseType: 'arraybuffer' });
+    const bufferData = Buffer.from(data);
+
+    return new Promise((resolve, reject) => {
+      bakery.bake({ image: bufferData, assertion: emissionData }, function (err, baked) {
+        if (err) {
+          reject(err);
+        }
+        // Convert the baked buffer to a base64 string
+        const base64Image = baked.toString('base64');
+        // Create a data URL from the base64 string
+        const dataURL = `data:image/png;base64,${base64Image}`;
+        resolve(dataURL);
+      });
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 const bakeBadge = async (emissionData, badgeImageUrl) => {
   try {
