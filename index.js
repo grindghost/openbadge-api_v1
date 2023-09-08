@@ -1,7 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const crypto = require('crypto');
+
+
 const admin = require('firebase-admin');
-// const serviceAccount = require("./cert/backpacks3-firebase-adminsdk-fb8nm-f264f57da4.json");
+
 
 const bakery = require('openbadges-bakery'); 
 // Patched version from OpenWorksGroup to fix a bug with the badge image...
@@ -266,16 +269,26 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
 
     // Send confirmation email
     // Create the url to download the backpack in the email
-    const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
+    // const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
+
+    // Generate a unique token
+    const uniqueToken = crypto.randomBytes(16).toString('hex');
+
+    // Save the token in the database along with user information
+    await db.ref(`users/${uid}/tokens/${uniqueToken}`).set({
+      created: Date.now(),
+      valid: true,
+    });
+    
+    // Create the url to download the backpack in the email
+    const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${uniqueToken}&uid=${uid}`;
 
     await SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
         
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });
 
-
 // ****************************************
-
 
 app.get('/api/bakeBadge', async (req, res) => {
   console.log("bakeBadge route called");
@@ -977,6 +990,54 @@ app.get('/api/downloadBackpack', async (req, res) => {
 
 app.get('/api/downloadBackpackFromEmail', async (req, res) => {
 
+  const { token, uid } = req.query;
+
+  // Verify the token
+  const tokenData = await db.ref(`users/${uid}/tokens/${token}`).once('value').then(snapshot => snapshot.val());
+
+  if (!tokenData || !tokenData.valid) {
+    return res.status(401).send({ error: 'Invalid token' });
+  }
+
+  // Invalidate the token so it can't be used again (if you want to)
+  // await db.ref(`users/${uid}/tokens/${token}`).update({ valid: false });
+
+  // Get the user name
+  const userData = await getUserName(uid);
+  const userName = userData[0];
+  const userPoints = userData[1];
+
+  // Get all badges for the user
+  const badges = await getAllBadgesForUser(uid);
+
+  // Bake all badges
+  const bakedBadges = {};
+  for (const badge of badges) {
+    const bakedBadge = await bakeBadge(badge.assertion, badge.imageUrl);
+    
+    const assertionid = badge.assertion.uid + '.png';
+    
+    bakedBadges[assertionid] = {
+     'data': bakedBadge,
+     'name':  badge.name,
+     'assertion': badge.assertion
+    };    
+  }
+
+  const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
+  const gridPdf = await htmlToPdf(htmlGrid);
+  // const headerImg = await extractHeaderImage(htmlGrid);
+  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges);
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=backpack.pdf');
+  res.end(mergedPdf);
+
+});
+
+/*
+app.get('/api/downloadBackpackFromEmail', async (req, res) => {
+
   const token = req.query.token;
   
   let uid;
@@ -1019,6 +1080,7 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
   res.end(mergedPdf);
 
 });
+*/
 // ****************************************
 
 // Start the server
