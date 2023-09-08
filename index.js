@@ -346,6 +346,16 @@ async function getRevocationDetails(assertionId) {
 
 }
 
+async function getPublicConfigs() {
+  const db = admin.database();
+
+  // Get the user name
+  const configsRef = db.ref(`configs`);
+  const configsSnapshot = await configsRef.once('value');
+  const configsData = configsSnapshot.val();
+  return configsData;
+}
+
 
 async function getUserName(userId) {
   const db = admin.database();
@@ -733,10 +743,12 @@ const extractHeaderImage = async (html) => {
   return screenshot;
 };
 
-async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers) {
+async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, configsData) {
 
   // Step 1: Load the first PDF containing the cover and the table of contents
-    const PdfUrl = 'https://www.dropbox.com/scl/fi/v21d3l1andv6b8vn0qrjq/backpack.pdf?rlkey=qa2wuud56pomucf7vm4ni2jsf&raw=true';
+    // const PdfUrl = 'https://www.dropbox.com/scl/fi/v21d3l1andv6b8vn0qrjq/backpack.pdf?rlkey=qa2wuud56pomucf7vm4ni2jsf&raw=true';
+
+    const PdfUrl = configsData.backpackPDF;
     
     // Step 2: Load the generated PDF and the second PDF using pdf-lib
     const firstPdfDoc = await PDFDocument.load(BackpackContentPDFBuffer);
@@ -951,6 +963,7 @@ app.get('/api/downloadBackpack', async (req, res) => {
   }
 
   // Get the global configs
+  const configsData = await getPublicConfigs();
 
   // Get the user name
   const userData = await getUserName(uid);
@@ -978,7 +991,7 @@ app.get('/api/downloadBackpack', async (req, res) => {
   const gridPdf = await htmlToPdf(htmlGrid);
   // const headerImg = await extractHeaderImage(htmlGrid);
   // const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, headerImg);
-  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges);
+  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, configsData);
 
 
   res.setHeader('Content-Type', 'application/pdf');
