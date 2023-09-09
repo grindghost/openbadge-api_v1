@@ -1,8 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
-const AWS = require('aws-sdk');
-
 
 const admin = require('firebase-admin');
 
