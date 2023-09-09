@@ -1,13 +1,14 @@
 const handlebars = require('handlebars')
+const { SafeString } = require('handlebars');
+
+
 const path = require('path')
 const fs = require('fs');
 const filePath = path.join(__dirname, './template.html');
 const source = fs.readFileSync(filePath, 'utf-8').toString();
 const template = handlebars.compile(source);
 
-handlebars.registerHelper('safeString', function(value) {
-  return new handlebars.SafeString(value);
-});
+
 
 const nodemailer = require("nodemailer");
 
@@ -16,7 +17,7 @@ async function SendEmail(recipientemail, imgurl, badgename, downloadurl, recipie
 
   // Dynamic replacement for handlebars, in the html template...
   const replacements = {
-    badgeimg: imgurl,
+    badgeimg: new SafeString(imgurl),
     badgename: badgename,
     downloadurl: downloadurl,
     recipient: recipient
@@ -25,7 +26,7 @@ async function SendEmail(recipientemail, imgurl, badgename, downloadurl, recipie
 
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
-  let testAccount = await nodemailer.createTestAccount();
+  // let testAccount = await nodemailer.createTestAccount();
 
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
