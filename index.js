@@ -424,8 +424,9 @@ const bakeBadgeForEmail = async (emissionData, badgeImageUrl) => {
         const base64Image = baked.toString('base64');
        
         // Create a data URL from the base64 string
-        const dataURL = `data:image/png;base64,${base64Image}`;
-        console.log('🔥', dataURL)
+        const dataURL = `${base64Image}`;
+        // const dataURL = `data:image/png;base64,${base64Image}`;
+
 
         resolve(dataURL);
       });

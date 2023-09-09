@@ -15,9 +15,12 @@ const nodemailer = require("nodemailer");
 // async..await is not allowed in global scope, must use a wrapper
 async function SendEmail(recipientemail, imgurl, badgename, downloadurl, recipient) {
 
+  const safe_imgurl = new SafeString(imgurl);
+  console.log(safe_imgurl);
+
   // Dynamic replacement for handlebars, in the html template...
   const replacements = {
-    badgeimg: new SafeString(imgurl),
+    badgeimg: safe_imgurl,
     badgename: badgename,
     downloadurl: downloadurl,
     recipient: recipient
