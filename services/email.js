@@ -50,6 +50,10 @@ async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, reci
       filename: 'badge.png',
       content: imgbuffer,
       cid: 'badgeimg_cid' //same cid value as in the html img src
+    },
+    {
+      filename: 'badge.png',
+      content: imgbuffer    
     }]
   });
 

@@ -5,7 +5,6 @@ const crypto = require('crypto');
 
 const admin = require('firebase-admin');
 
-
 const bakery = require('openbadges-bakery'); 
 // Patched version from OpenWorksGroup to fix a bug with the badge image...
 // https://github.com/OpenWorksGroup/openbadges-bakery/
@@ -272,9 +271,9 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
 
     // Try to bake the badge before sending it to email (send a baked version)
-    // const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
+    const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
 
-    const bakedBadgePNG = await bakeBadge(newAssertion, badgeData.image);
+    // const bakedBadgePNG = await bakeBadge(newAssertion, badgeData.image);
 
     // Generate a unique token
     const uniqueToken = crypto.randomBytes(16).toString('hex');
@@ -426,8 +425,8 @@ const bakeBadgeForEmail = async (emissionData, badgeImageUrl) => {
         const base64Image = baked.toString('base64');
        
         // Create a data URL from the base64 string
-        const dataURL = `${base64Image}`;
-        // const dataURL = `data:image/png;base64,${base64Image}`;
+        // const dataURL = `${base64Image}`;
+        const dataURL = `data:image/png;base64,${base64Image}`;
 
 
         resolve(dataURL);
