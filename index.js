@@ -172,6 +172,10 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
         // Else, return the assertion data (and make sure the assertion is not revoked)  
         await db.ref(`assertions/${assertionId}/revoked`).set(false);
 
+        // Test to preview the base64 image string
+        const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
+        console.log('🟡', bakedBadgePNG)
+
         return res.status(409).json({ error: 'User already has the badge', assertion: assertionData, badgeImageUrl: badgeData.image });
     }
 
@@ -422,8 +426,11 @@ const bakeBadgeForEmail = async (emissionData, badgeImageUrl) => {
         }
         // Convert the baked buffer to a base64 string
         const base64Image = baked.toString('base64');
+       
         // Create a data URL from the base64 string
         const dataURL = `data:image/png;base64,${base64Image}`;
+        console.log('🔥', dataURL)
+
         resolve(dataURL);
       });
     });
