@@ -4,6 +4,11 @@ const fs = require('fs');
 const filePath = path.join(__dirname, './template.html');
 const source = fs.readFileSync(filePath, 'utf-8').toString();
 const template = handlebars.compile(source);
+
+handlebars.registerHelper('safeString', function(value) {
+  return new handlebars.SafeString(value);
+});
+
 const nodemailer = require("nodemailer");
 
 // async..await is not allowed in global scope, must use a wrapper

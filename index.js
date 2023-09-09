@@ -172,10 +172,6 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
         // Else, return the assertion data (and make sure the assertion is not revoked)  
         await db.ref(`assertions/${assertionId}/revoked`).set(false);
 
-        // Test to preview the base64 image string
-        const bakedBadgePNG = await bakeBadgeForEmail(assertionData, badgeData.image);
-        console.log('🟡', bakedBadgePNG)
-
         return res.status(409).json({ error: 'User already has the badge', assertion: assertionData, badgeImageUrl: badgeData.image });
     }
 
@@ -276,7 +272,7 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${token}`;
 
     // Try to bake the badge before sending it to email (send a baked version)
-    // const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
+    const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
 
     // Generate a unique token
     const uniqueToken = crypto.randomBytes(16).toString('hex');
@@ -290,7 +286,7 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // Create the url to download the backpack in the email
     const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${uniqueToken}&uid=${uid}`;
 
-    await SendEmail(userData.email, badgeData.image, badgeData.name, download_backpack_url, userData.name);
+    await SendEmail(userData.email, bakedBadgePNG, badgeData.name, download_backpack_url, userData.name);
         
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });
