@@ -1050,6 +1050,9 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
   // Invalidate the token so it can't be used again (if you want to)
   // await db.ref(`users/${uid}/tokens/${token}`).update({ valid: false });
 
+   // Get the global configs
+  const configsData = await getPublicConfigs();
+
   // Get the user name
   const userData = await getUserName(uid);
   const userName = userData[0];
@@ -1075,7 +1078,7 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
   const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
   const gridPdf = await htmlToPdf(htmlGrid);
   // const headerImg = await extractHeaderImage(htmlGrid);
-  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges);
+  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, configsData);
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'attachment; filename=backpack.pdf');
