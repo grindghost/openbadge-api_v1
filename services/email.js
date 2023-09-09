@@ -1,6 +1,4 @@
 const handlebars = require('handlebars')
-const { SafeString } = require('handlebars');
-
 
 const path = require('path')
 const fs = require('fs');
@@ -13,14 +11,11 @@ const template = handlebars.compile(source);
 const nodemailer = require("nodemailer");
 
 // async..await is not allowed in global scope, must use a wrapper
-async function SendEmail(recipientemail, imgurl, badgename, downloadurl, recipient) {
-
-  const safe_imgurl = new SafeString(imgurl);
-  console.log(safe_imgurl);
+async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, recipient) {
 
   // Dynamic replacement for handlebars, in the html template...
   const replacements = {
-    badgeimg: safe_imgurl,
+    badgeimg_cid: 'badgeimg_cid',
     badgename: badgename,
     downloadurl: downloadurl,
     recipient: recipient
@@ -51,6 +46,11 @@ async function SendEmail(recipientemail, imgurl, badgename, downloadurl, recipie
     subject: " 🎒 Vous avez reçu un nouveau badge!", // Subject line
     // text: "Hello world?", // plain text body
     html: htmlToSend, // html body
+    attachments: [{
+      filename: 'badge.png',
+      content: imgbuffer,
+      cid: 'badgeimg_cid' //same cid value as in the html img src
+    }]
   });
 
   console.log("Message sent: %s", info.messageId);
