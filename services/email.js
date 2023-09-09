@@ -13,6 +13,9 @@ const nodemailer = require("nodemailer");
 // async..await is not allowed in global scope, must use a wrapper
 async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, recipient) {
 
+  // Save the file and attach it to the email
+  fs.writeFileSync('badge_embeded.png', imgbuffer);
+
   // Dynamic replacement for handlebars, in the html template...
   const replacements = {
     badgeimg_cid: 'badgeimg_cid',
@@ -48,7 +51,8 @@ async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, reci
     html: htmlToSend, // html body
     attachments: [{
       filename: 'badge.png',
-      content: imgbuffer,
+      // content: imgbuffer,
+      path: 'badge_embeded.png',
       encoding: 'binary',
       cid: 'badgeimg_cid' //same cid value as in the html img src
     },
@@ -61,6 +65,9 @@ async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, reci
 
   console.log("Message sent: %s", info.messageId);
   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+  // Clean the file after sending the email
+  fs.unlinkSync('badge_embeded.png');
 }
 
 // SendEmail().catch(console.error);
