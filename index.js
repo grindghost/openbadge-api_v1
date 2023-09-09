@@ -173,7 +173,7 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
         await db.ref(`assertions/${assertionId}/revoked`).set(false);
 
         // Test to preview the base64 image string
-        const bakedBadgePNG = await bakeBadgeForEmail(newAssertion, badgeData.image);
+        const bakedBadgePNG = await bakeBadgeForEmail(assertionData, badgeData.image);
         console.log('🟡', bakedBadgePNG)
 
         return res.status(409).json({ error: 'User already has the badge', assertion: assertionData, badgeImageUrl: badgeData.image });
