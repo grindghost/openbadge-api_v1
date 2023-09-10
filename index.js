@@ -286,7 +286,7 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     // Create the url to download the backpack in the email
     const download_backpack_url = `${process.env.BASE_API_URL}api/downloadBackpackFromEmail?token=${uniqueToken}&uid=${uid}`;
 
-    await SendEmail(userData.email, bakedBadgePNG, badgeData.name, download_backpack_url, userData.name);
+    await SendEmail(userData.email, bakedBadgePNG, badgeData.name, download_backpack_url, userData.name, newAssertion.uid);
         
     res.json({ message: 'Badge earned successfully', badge: badgeData, assertion: assertionData, badgeImageUrl: badgeData.image  });
 });

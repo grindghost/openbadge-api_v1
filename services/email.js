@@ -8,7 +8,7 @@ const template = handlebars.compile(source);
 const nodemailer = require("nodemailer");
 
 // async..await is not allowed in global scope, must use a wrapper
-async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, recipient) {
+async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, recipient, assertion_id) {
 
   // Dynamic replacement for handlebars, in the html template...
   const replacements = {
@@ -35,7 +35,6 @@ async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, reci
     },
   });
 
-
   // send mail with defined transport object
   let info = await transporter.sendMail({
     from: '"Université Laval" <ulaval.devteam@gmail.com>', // sender address
@@ -44,14 +43,14 @@ async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, reci
     // text: "Hello world?", // plain text body
     html: htmlToSend, // html body
     attachments: [{
-      filename: 'badge.png',
+      filename: `assertion-${assertion_id}.png`,
       content: imgbuffer,
       encoding: 'binary',
       contentDisposition: 'inline',
       cid: 'badgeimg_cid' //same cid value as in the html img src
     },
     {
-      filename: 'badge.png',
+      filename:  `assertion-${assertion_id}.png`,
       encoding: 'binary',
       content: imgbuffer    
     }]
