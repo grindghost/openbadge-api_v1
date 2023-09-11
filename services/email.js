@@ -8,13 +8,14 @@ const template = handlebars.compile(source);
 const nodemailer = require("nodemailer");
 
 // async..await is not allowed in global scope, must use a wrapper
-async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, recipient, assertion_id) {
+async function SendEmail(recipientemail, imgbuffer, badgename, downloadurl, recipient, assertion_id, verifyurl) {
 
   // Dynamic replacement for handlebars, in the html template...
   const replacements = {
     badgeimg_cid: 'badgeimg_cid',
     badgename: badgename,
     downloadurl: downloadurl,
+    verifyurl: verifyurl,
     recipient: recipient
   };
   const htmlToSend = template(replacements);
