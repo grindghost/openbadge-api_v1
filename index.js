@@ -456,6 +456,299 @@ const bakeBadge = async (emissionData, badgeImageUrl) => {
 };
 
 const generateHtmlGrid = (badges, username, user_points) => {
+  // ... (same as your existing code for placeholderBadge, timestamp, etc.)
+
+  // Create a placeholder badge for empty spots
+  const placeholderBadge = {
+      imageUrl: 'https://www.dropbox.com/scl/fi/pmo6iis7kfgsk90k2thez/empty.png?rlkey=c74t66op8q62y1s5ypxm5u1na&raw=true',
+      isPlaceholder: true
+  };
+
+  // Fill the grid with placeholder badges until there's a total of 9
+  while (badges.length % 9 !== 0) {
+      badges.push(placeholderBadge);
+  }
+
+  // Create a timestamp
+  const timestamp = Date.now();
+  const date = new Date(timestamp);
+  const downloadedOn = date.toISOString();
+
+  const downloadedOnFrenchDate = _formatDateToFrench(downloadedOn);
+
+
+  const styles = `
+    @import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Overpass', sans-serif;
+      margin: 0;
+    }
+    .page {
+      display: flex;
+      flex-direction: column;
+      height: 11in;
+      width: 8.5in;
+      page-break-after: always;
+    }
+   
+    .header {
+      background-color: white;
+      border-bottom: 6px solid #f0f2f5;
+      height: auto;
+    }
+    
+    .header img {
+      width: 100%;
+    }
+
+    .footer {
+      background-color: #f0f2f5;
+      padding: 10px 10px 10px 10px;
+      margin: 30px;
+      border-radius: 5px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Source Sans 3';
+      font-size: 12px;
+      height: 26px;               /* Fixed height for header/footer */
+  }
+
+    .content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .grid {
+      display: grid;
+      grid-auto-rows: 1fr;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 32px 36px 10px 36px;
+    }
+
+    .card {
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .card img {
+        max-width: 80px;
+        height: auto;
+        border-radius: 5px;
+        position: relative; 
+        margin-top: 10px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-top: 12px;
+    }
+
+    .card p {
+      font-family: 'Source Sans 3';
+      font-size: 13px;
+      margin: 5px 0;
+      line-height: 1.0;
+      margin-bottom: 8px;
+    }
+
+    strong {
+      font-weight: 600;  
+    }
+
+    .status-band {
+      position: absolute;
+      width: fit-content;
+      top: -4px;  /* Margin from the top */
+      left: -4px; /* Margin from the left */
+      height: 20px;
+      line-height: 20px; 
+      color: black;
+      font-weight: bold;
+      font-size: 13px;
+      text-align: left;
+      display: inline-block;       /* Ensure the width fits the content */
+      padding: 3px 10px 20px 10px;              /* Small horizontal padding to give it some room */
+    }
+
+    .point-band {
+      position: absolute;
+      width: fit-content;
+      top: -4px;  /* Margin from the top */
+      right: -4px; /* Margin from the left */
+      height: 20px;
+      line-height: 20px; 
+      color: black;
+      font-family: 'Source Sans 3';
+      font-size: 13px;
+      text-align: left;
+      display: inline-block;       /* Ensure the width fits the content */
+      padding: 3px 10px 20px 10px;    
+    }
+    
+    .status-band.revoked {
+      background-color: #e10414;
+      border-radius: 3px;
+      color: white;
+    }
+  
+    .status-band.expired {
+      background-color: #fdbf08;
+      border-radius: 3px;
+      color: white;
+    }
+
+    a {
+      text-decoration: none;
+      color: black;
+    }
+
+    .header-username {
+      position: absolute;
+      z-index: 10;
+      font-family: 'Source Sans 3';
+      font-size: 18px;
+      font-weight: 600;
+      text-align: right;
+      line-height: 100%;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      width: 100%;
+      height: 150px;
+      right: 40px;
+    }
+
+    .version {
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    .points {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background-color: #f0f2f5;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        padding: 30px;
+        margin-left: 20px;
+      }
+
+      strong {
+        font-weight: 600;  
+      }
+
+  `;
+
+  const header = `
+    <div class="header">
+      <img class="header-img" src="https://www.dropbox.com/scl/fi/6e4bp0s93hdhk7hty4z35/header.svg?rlkey=svvz6xprj30au8yovt9xqs527&raw=true">
+    </div>
+    <div class="header-username">
+      <span class="username">${username}<br>
+        <span class="version">${downloadedOnFrenchDate}</span>
+      </span>
+      <span class="points">${user_points}<span style="font-size: 10px;">&nbsp;pts</span></span>
+      
+  </div>
+  `;
+
+  const footer = `
+    <div class="footer">Développé pour l'Université Laval.</div>
+  `;
+
+  const pages = [];
+
+  const firstPageContent = `
+    <div class="page">
+      ${header}
+      <div class="content" style="display: flex; align-items: center; justify-content: center;">
+        <img src="https://www.dropbox.com/scl/fi/wfkrnbmg6ka79mwvpkyf6/bp_cover_img.svg?rlkey=5gkuoqzd0uqih7n3nrwvtyasc&raw=true" style="width: 100%;" alt="Mon sac à dos académique">
+      </div>
+    </div>
+  `;
+
+  pages.push(firstPageContent);
+
+  for (let i = 0; i < badges.length; i += 9) {
+    const pageContent = `
+      <div class="page">
+        ${header}
+        <div class="content">
+          <div class="grid">
+          ${badges.slice(i, i + 9).map(badge => {
+            if (badge.isPlaceholder) {
+                // Adjust the markup for placeholder badges here
+                return `
+                <div class="card">
+                    <img src="${badge.imageUrl}" alt="Placeholder" />
+                    <div style="height: 15px; width: 100%; background-color: #f0f2f5; margin: 10px 0;"></div>
+                    <div style="height: 15px; width: 70%; background-color: #f0f2f5; margin: 10px auto;"></div>
+                    <div style="height: 15px; width: 50%; background-color: #f0f2f5; margin: 10px auto;"></div>
+                </div>`;
+            } else {    
+              console.log('🧙‍♀️', badge)
+  
+              const statusBand = badge.revokedReason == 'expired' ? 
+                                  '<div class="status-band expired">Expiré</div>' :
+                                  badge.revokedReason != 'placeholder' ? 
+                                  '<div class="status-band revoked">Révoqué</div>' : '';
+                                                              
+        
+                return `
+                <a href="${badge.assertion.verify.url}" target="_blank" alt="assertion">
+                <div class="card">
+                    <div style="position: relative;">  <!-- wrapper for image and status band -->
+                        <img src="${badge.imageUrl}" alt="${badge.name}" />
+                        ${statusBand}
+                        <div class="point-band">${badge.assertion.points} pts</div>
+                    </div>
+                    <h2>${badge.name}</h2>
+                    <p>🎓 <strong>Cours: </strong>${badge.assertion.course}</p>
+                    <p>🗓 <strong>Date: </strong>${formatDateToFrench(badge.assertion.issuedOn)}</p>
+                    <p>📦 <strong>UID: </strong> ${badge.assertion.uid}</p>
+                </div>
+                </a>`;
+            }
+        }).join('')}
+          </div>
+        </div>
+        
+      </div>
+    `;
+
+    // footer up there...
+
+    pages.push(pageContent);
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>${styles}</style>
+    </head>
+    <body>
+      ${pages.join('')}
+    </body>
+    </html>
+  `;
+};
+
+const _generateHtmlGrid = (badges, username, user_points) => {
 
     // Create a placeholder badge for empty spots
     const placeholderBadge = {
@@ -568,8 +861,8 @@ const generateHtmlGrid = (badges, username, user_points) => {
           </span>
           <span class="points">${user_points}pts</span>
       </div>
-      <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-        <img src="https://www.dropbox.com/scl/fi/wfkrnbmg6ka79mwvpkyf6/bp_cover_img.svg?rlkey=5gkuoqzd0uqih7n3nrwvtyasc&raw=true" style="width: 100%;" alt="Mon sac à dos académique">
+      <div style="display: flex; align-items: center; justify-content: center; overflow: hidden;">
+        <img src="https://www.dropbox.com/scl/fi/wfkrnbmg6ka79mwvpkyf6/bp_cover_img.svg?rlkey=5gkuoqzd0uqih7n3nrwvtyasc&raw=true" style="width: 99%;" alt="Mon sac à dos académique">
       </div>
     </body>
     </html>
@@ -593,6 +886,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
     <style>
 
     @import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    
     * {
       box-sizing: border-box;
     }
@@ -783,7 +1077,6 @@ const generateHtmlGrid = (badges, username, user_points) => {
     ${badges.slice(i, i + 9).map(badge => {
         if (badge.isPlaceholder) {
             // Adjust the markup for placeholder badges here
-            // Adjust the markup for placeholder badges here
             return `
             <div class="card">
                 <img src="${badge.imageUrl}" alt="Placeholder" />
@@ -877,7 +1170,66 @@ const extractHeaderImage = async (html) => {
   return screenshot;
 };
 
+
+// ****************************************
+
 async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, configsData) {
+
+  // Step 1: Load the first PDF containing the cover and the table of contents
+    // const PdfUrl = 'https://www.dropbox.com/scl/fi/v21d3l1andv6b8vn0qrjq/backpack.pdf?rlkey=qa2wuud56pomucf7vm4ni2jsf&raw=true';
+
+    
+    // Load the puppeteer PDF
+    const firstPdfDoc = await PDFDocument.load(BackpackContentPDFBuffer);
+
+    // Create a new PDF
+    const pdfDoc = await PDFDocument.create();
+
+    // Copy all pages from the second PDF and add to new PDF
+    const pdfDocumentPages = await pdfDoc.copyPages(firstPdfDoc, Array.from({ length: firstPdfDoc.getPageCount() }, (_, i) => i));
+    
+    // Add all the pages
+    for (const page of pdfDocumentPages) {
+        pdfDoc.addPage(page);
+    }
+
+    // Add metadata to the merged PDF
+    pdfDoc.setTitle(`Mon sac à dos académique | ${username}`);
+    pdfDoc.setAuthor('Université Laval');
+    pdfDoc.setSubject('Version autoportante de votre sac à dos contenant tous vos badges numériques.');
+    pdfDoc.setKeywords([`Nom: ${username}, ID: ${userid}`]);
+    pdfDoc.setCreator('Mon sac à dos académiques');
+    pdfDoc.setProducer('Université Laval');
+    pdfDoc.setLanguage('fr-CA');
+
+    // Viewer preferences
+    const viewerPrefs = pdfDoc.catalog.getOrCreateViewerPreferences(); 
+    viewerPrefs.setDisplayDocTitle(true);
+    viewerPrefs.setCenterWindow(true);
+    viewerPrefs.setFitWindow(true);
+
+    // Test to display the attachments panel by default
+    pdfDoc.catalog.set(PDFName.of('PageMode'), PDFName.of('UseAttachments'));
+
+    // Add attachments
+    for (const [filename, pngData] of Object.entries(pngBuffers)) {
+
+    // if we need to convert this to ArrayBuffer instead of node Buffer
+    // const imgArrayBuffer = bufferToArrayBuffer(pngData);
+      
+      await pdfDoc.attach(pngData.data, `${filename}`, {
+          description: `${pngData.name}`,
+          mimeType: 'image/png',
+      });
+  }
+
+    const updatedPdfBuffer = await pdfDoc.save();
+    return updatedPdfBuffer;
+  }
+
+// ****************************************
+
+async function _MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, configsData) {
 
   // Step 1: Load the first PDF containing the cover and the table of contents
     // const PdfUrl = 'https://www.dropbox.com/scl/fi/v21d3l1andv6b8vn0qrjq/backpack.pdf?rlkey=qa2wuud56pomucf7vm4ni2jsf&raw=true';
