@@ -476,6 +476,110 @@ const generateHtmlGrid = (badges, username, user_points) => {
   const downloadedOnFrenchDate = _formatDateToFrench(downloadedOn);
 
   const pages = [];
+
+  // ****************************************
+  // 18 septembre 2023
+  // Try to add a first page...
+  // Create a first page with header and full-width image
+  const firstPageContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+
+    <style>
+
+      @import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+      
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+          font-family: 'Overpass', sans-serif;
+          display: flex;               /* Enable Flex */
+          flex-direction: column;     /* Stack children vertically */
+          height: 100vh;              /* Take up the full viewport height */
+          margin: 0;                  /* Remove default margin */
+      }
+    
+    
+      .header {
+        align-items: center;
+        background-color: white;
+        border-bottom: 6px solid #f0f2f5;
+        width: auto;             /* Fixed height for header/footer */
+        height: auto;
+      }
+
+      .header img {
+        width: 100%;
+      }
+
+      .header-username {
+        position: absolute;
+        z-index: 10;
+        font-family: 'Source Sans 3';
+        font-size: 18px;
+        font-weight: 600;
+        text-align: right;
+        line-height: 100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: 100%;
+        height: 150px;
+        right: 40px;
+      }
+
+      .version {
+          font-size: 14px;
+          font-weight: 400;
+      }
+
+      .points {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          background-color: #f0f2f5;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          padding: 30px;
+          margin-left: 20px;
+        }
+
+        strong {
+          font-weight: 600;  
+        }
+    </style>
+
+    </head>
+    <body>
+      <div class="header">
+        <img class="header-img" src="https://www.dropbox.com/scl/fi/6e4bp0s93hdhk7hty4z35/header.svg?rlkey=svvz6xprj30au8yovt9xqs527&raw=true">
+      </div>
+      <div class="header-username">
+          <span class="username">${username}<br>
+              <span class="version">${downloadedOnFrenchDate}</span> 
+          </span>
+          <span class="points">${user_points}pts</span>
+      </div>
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+        <img src="https://www.dropbox.com/scl/fi/wfkrnbmg6ka79mwvpkyf6/bp_cover_img.svg?rlkey=5gkuoqzd0uqih7n3nrwvtyasc&raw=true" style="width: 100%;" alt="Mon sac à dos académique">
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Push the first page content to the pages array
+  pages.push(firstPageContent);
+
+  // ****************************************
+
   for (let i = 0; i < badges.length; i += 9) {
       const pageContent = `
 
