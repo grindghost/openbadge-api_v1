@@ -506,8 +506,8 @@ const generateHtmlGrid = (badges, username, user_points) => {
 
     .footer {
       background-color: #f0f2f5;
-      padding: 10px 10px 10px 10px;
-      margin: 30px;
+      padding: 24px 24px 24px 24px;
+      margin: 16px;
       border-radius: 5px;
       text-align: center;
       display: flex;
@@ -515,7 +515,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
       justify-content: center;
       font-family: 'Source Sans 3';
       font-size: 12px;
-      height: 26px;               /* Fixed height for header/footer */
+      height: 32px;               /* Fixed height for header/footer */
   }
 
     .content {
@@ -554,7 +554,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
 
     .card p {
       font-family: 'Source Sans 3';
-      font-size: 13px;
+      font-size: 12px;
       margin: 5px 0;
       line-height: 1.0;
       margin-bottom: 8px;
@@ -724,7 +724,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
         }).join('')}
           </div>
         </div>
-        
+        ${footer}
       </div>
     `;
 
