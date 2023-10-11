@@ -391,6 +391,15 @@ async function getAllBadgesForUser(userId) {
     const badgeImageSnapshot = await badgeImageRef.once('value');
     const badgeImageData = badgeImageSnapshot.val();
 
+    // Get the issuer details
+    const issuerUrl = badgeImageData.issuer;
+    const issuerUrlLastSegment = issuerUrl.split('/').pop();
+    const issuerId = issuerUrlLastSegment.replace('.json', '');
+
+    const issuerRef = db.ref(`issuers/${issuerId}`);
+    const issuerSnapshot = await issuerRef.once('value');
+    const issuerData = issuerSnapshot.val();
+
     // Get the assertions details
     const assertionRef = db.ref(`assertions/${value.assertionId}`);
     const assertionSnapshot = await assertionRef.once('value');
@@ -398,9 +407,18 @@ async function getAllBadgesForUser(userId) {
 
     const revokedDetails = await RetrieveAndUpdateRevocationDetails(assertionData)
 
+    // Get the course details
+    const courseRef = db.ref(`courses/${assertionData.course}`);
+    const courseSnapshot = await courseRef.once('value');
+    const courseData = courseSnapshot.val();
+
     userBadgesBackpack.push({
+      id: key,
+      issuer: issuerData,
+      course: courseData,
       name: badgeImageData.name,
       imageUrl: badgeImageData.image,
+      description: badgeImageData.description,
       assertion: assertionData,
       revoked: revokedDetails.revokedStatus,
       revokedReason: revokedDetails.reason
@@ -455,8 +473,7 @@ const bakeBadge = async (emissionData, badgeImageUrl) => {
   }
 };
 
-const generateHtmlGrid = (badges, username, user_points) => {
-  // ... (same as your existing code for placeholderBadge, timestamp, etc.)
+const _generateHtmlGrid = (badges, username, user_points) => {
 
   // Create a placeholder badge for empty spots
   const placeholderBadge = {
@@ -728,9 +745,6 @@ const generateHtmlGrid = (badges, username, user_points) => {
         ${footer}
       </div>
     `;
-
-    // footer up there...
-
     pages.push(pageContent);
   }
 
@@ -749,16 +763,18 @@ const generateHtmlGrid = (badges, username, user_points) => {
   `;
 };
 
-const _generateHtmlGrid = (badges, username, user_points) => {
+// ****************************************
+// New PDF grid
+const generateHtmlGrid = (badges, username, user_points) => {
 
-    // Create a placeholder badge for empty spots
-    const placeholderBadge = {
+  // Create a placeholder badge for empty spots
+  const placeholderBadge = {
       imageUrl: 'https://www.dropbox.com/scl/fi/pmo6iis7kfgsk90k2thez/empty.png?rlkey=c74t66op8q62y1s5ypxm5u1na&raw=true',
       isPlaceholder: true
   };
 
   // Fill the grid with placeholder badges until there's a total of 9
-  while (badges.length % 9 !== 0) {
+  while (badges.length % 3 !== 0) {
       badges.push(placeholderBadge);
   }
 
@@ -769,149 +785,127 @@ const _generateHtmlGrid = (badges, username, user_points) => {
 
   const downloadedOnFrenchDate = _formatDateToFrench(downloadedOn);
 
-  const pages = [];
 
-  // ****************************************
-  // 18 septembre 2023
-  // Try to add a first page...
-  // Create a first page with header and full-width image
-  const firstPageContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-
-    <style>
-
-      @import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-      
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-          font-family: 'Overpass', sans-serif;
-          display: flex;               /* Enable Flex */
-          flex-direction: column;     /* Stack children vertically */
-          height: 100vh;              /* Take up the full viewport height */
-          margin: 0;                  /* Remove default margin */
-      }
-    
-    
-      .header {
-        align-items: center;
-        background-color: white;
-        border-bottom: 6px solid #f0f2f5;
-        width: auto;             /* Fixed height for header/footer */
-        height: auto;
-      }
-
-      .header img {
-        width: 100%;
-      }
-
-      .header-username {
-        position: absolute;
-        z-index: 10;
-        font-family: 'Source Sans 3';
-        font-size: 18px;
-        font-weight: 600;
-        text-align: right;
-        line-height: 100%;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        width: 100%;
-        height: 150px;
-        right: 40px;
-      }
-
-      .version {
-          font-size: 14px;
-          font-weight: 400;
-      }
-
-      .points {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          background-color: #f0f2f5;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          padding: 30px;
-          margin-left: 20px;
-        }
-
-        strong {
-          font-weight: 600;  
-        }
-    </style>
-
-    </head>
-    <body>
-      <div class="header">
-        <img class="header-img" src="https://www.dropbox.com/scl/fi/6e4bp0s93hdhk7hty4z35/header.svg?rlkey=svvz6xprj30au8yovt9xqs527&raw=true">
-      </div>
-      <div class="header-username">
-          <span class="username">${username}<br>
-              <span class="version">${downloadedOnFrenchDate}</span> 
-          </span>
-          <span class="points">${user_points}pts</span>
-      </div>
-      <div style="display: flex; align-items: center; justify-content: center; overflow: hidden;">
-        <img src="https://www.dropbox.com/scl/fi/wfkrnbmg6ka79mwvpkyf6/bp_cover_img.svg?rlkey=5gkuoqzd0uqih7n3nrwvtyasc&raw=true" style="width: 99%;" alt="Mon sac à dos académique">
-      </div>
-    </body>
-    </html>
-  `;
-
-  // Push the first page content to the pages array
-  pages.push(firstPageContent);
-
-  // ****************************************
-
-  for (let i = 0; i < badges.length; i += 9) {
-      const pageContent = `
-
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-
-    <style>
-
+  const styles = `
     @import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
     
     * {
       box-sizing: border-box;
+      text-rendering: geometricPrecision !important;
+    }
+    
+    body {
+      font-family: 'Overpass', sans-serif;
+      margin: 0;
+    }
+    
+    .page {
+      display: flex;
+      flex-direction: column;
+      height: 11in;
+      width: 8.5in;
+      page-break-after: always;
     }
 
-      body {
-        font-family: 'Overpass', sans-serif;
-        display: flex;               /* Enable Flex */
-        flex-direction: column;     /* Stack children vertically */
-        height: 100vh;              /* Take up the full viewport height */
-        margin: 0;                  /* Remove default margin */
-    }
-    
-    
     .header {
-      align-items: center;
       background-color: white;
       border-bottom: 6px solid #f0f2f5;
-      width: auto;             /* Fixed height for header/footer */
       height: auto;
     }
 
     .header img {
       width: 100%;
-  }
+    }
+
+    .footer {
+      background-color: #f0f2f5;
+      padding: 24px 24px 24px 24px;
+      margin: 16px;
+      border-radius: 5px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Source Sans 3';
+      font-size: 12px;
+      height: 32px;               /* Fixed height for header/footer */
+    }
+
+    .content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 32px 36px 10px 36px;
+    }
+
+    .card {
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+
+    .attestation-info-col3 img {
+      max-width: 80px;
+      height: auto;
+      position: relative;
+      margin-top: 2px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-top: 12px;
+    }
+
+    .card p {
+      font-family: 'Source Sans 3';
+      font-size: 13px;
+      margin: 5px 0;
+      line-height: 1.0;
+      margin-bottom: 7px;
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    .status-band {
+      width: fit-content;
+      height: 20px;
+      line-height: 20px;
+      color: black;
+      font-weight: bold;
+      font-size: 13px;
+      text-align: left;
+      display: inline-block;       /* Ensure the width fits the content */
+      padding: 3px 10px 20px 10px;              
+    }
+
+    .status-band.revoked {
+      background-color: #e10414;
+      border-radius: 3px;
+      color: white;
+    }
+
+    .status-band.expired {
+      background-color: #fdbf08;
+      border-radius: 3px;
+      color: white;
+    }
+
+    a {
+      text-decoration: none;
+      color: #1a93fb;
+    }
 
     .header-username {
       position: absolute;
@@ -927,14 +921,14 @@ const _generateHtmlGrid = (badges, username, user_points) => {
       width: 100%;
       height: 150px;
       right: 40px;
-  }
+    }
 
-  .version {
+    .version {
       font-size: 14px;
       font-weight: 400;
-  }
+    }
 
-  .points {
+    .points {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -947,187 +941,249 @@ const _generateHtmlGrid = (badges, username, user_points) => {
       margin-left: 20px;
     }
 
-  .footer {
-      background-color: #f0f2f5;
-      padding: 20px;
-      margin: 30px;
-      border-radius: 5px;
-      text-align: center;
+    strong {
+      font-weight: 600;
+    }
+
+    .badge-container {
       display: flex;
       align-items: center;
+      height: 120px;
+    }
+
+    .badge-image-wrapper {
+      display: flex;
+      flex-direction: column;
       justify-content: center;
-      font-family: 'Source Sans 3';
-      font-size: 12px;
-      height: 60px;               /* Fixed height for header/footer */
-  }
-    
-  .grid {
-    display: grid;
-    grid-auto-rows: 1fr; 
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 32px 36px 10px 36px; ;
-/*     max-width: 90%;
-    margin: 0 auto; */
-    flex: 1;                    /* Expand to take up available space */
-    overflow-y: auto;           /* Add scrollbar if content exceeds the middle space */
-}
-
-  .card {
-      border: 1px solid #e0e0e0;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      text-align: center;
-  }
-
-  .card img {
-      max-width: 80px;
-      height: auto;
-      border-radius: 5px;
-      position: relative; 
-      margin-top: 10px;
-  }
-
-  .card h2 {
-      font-size: 18px;
-      margin-top: 12px;
-  }
-
-  .card p {
-      font-family: 'Source Sans 3';
-      font-size: 13px;
-      margin: 5px 0;
-      line-height: 1.0;
-      margin-bottom: 8px;
-  }
-
-  strong {
-    font-weight: 600;  
-  }
-
-  .status-band {
-  position: absolute;
-    width: fit-content;
-    top: -4px;  /* Margin from the top */
-    left: -4px; /* Margin from the left */
-    height: 20px;
-    line-height: 20px; 
-    color: black;
-    font-weight: bold;
-    font-size: 13px;
-    text-align: left;
-    display: inline-block;       /* Ensure the width fits the content */
-    padding: 3px 10px 20px 10px;              /* Small horizontal padding to give it some room */
     }
 
-    .point-band {
+    .badge-image-wrapper img {
+      max-width: 95px;
+      margin: 0px 30px 0px 16px;
+    }
+
+    .badge-container:after {
+      content:  " ";
+      background-color: black;
+      border-radius: 4px 0px 0px 4px;
+      width: 8px;
+      height: 88px;
+      z-index: 10;
+      margin-left: 0px;
+      margin-top: 228px;
       position: absolute;
-      width: fit-content;
-      top: -4px;  /* Margin from the top */
-      right: -4px; /* Margin from the left */
-      height: 20px;
-      line-height: 20px; 
-      color: black;
-      font-family: 'Source Sans 3';
-      font-size: 13px;
-      text-align: left;
-      display: inline-block;       /* Ensure the width fits the content */
-      padding: 3px 10px 20px 10px;    
-    
     }
 
+    .attestation-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      border: 2px solid #ebeced;
+      border-radius: 6px;
+      background-color: #f7f7f7;
+      overflow: hidden;
+      height: 88px;
 
-    
-  .status-band.revoked {
-      background-color: #e10414;
-      border-radius: 3px;
-      color: white;
-  }
-  
-  .status-band.expired {
-      background-color: #fdbf08;
-      border-radius: 3px;
-      color: white;
-  }
+    }
 
-        a {
-          text-decoration: none;
-          color: black;
-        }
+    .attestation-info-col1 {
+      display: flex;         /* Convert this into a flex container */
+      flex-direction: column; /* Stack its children vertically */
+      justify-content: flex-start;
+      width: 300px;
+      height: 100%;
+      overflow-wrap: break-word;
+      border-right: 2px solid #ebeced;
+      hyphens: auto;
+      padding: 8px 10px 10px 20px;
+    }
 
-  
-    </style>
+    .attestation-info-col2 {
+      display: flex;         /* Convert this into a flex container */
+      flex-direction: column; /* Stack its children vertically */
+      justify-content: flex-start;
+      width: 290px;
+      height: 100%;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      padding: 8px 20px 10px 14px;
+    }
 
-    </head>
-    
-    <body>
+    .attestation-info-col3 {
+      display: flex;         /* Convert this into a flex container */
+      flex-direction: column; /* Stack its children vertically */
+      justify-content: flex-start;
+      height: 100%;
+      padding: 8px 10px 10px 10px;
+      flex-grow: 1;
+    }
 
+    /* H3 margins correction */
+    h3 {
+      margin: 0px;
+      font-size: 16px;
+    }
+
+    .badge-info {
+      width: 100%;
+      padding-right: 110px;
+    }
+
+    .badge-info h3 {
+      font-size: 20px;
+    }
+
+    .badge-info .badge-id {
+      margin-bottom: 12px;
+    }
+
+    .badge-points {
+      font-size: 14px;
+      white-space: nowrap;
+      margin-bottom: auto;
+    }
+
+    .indented {
+      text-indent: -57px;
+      padding-left: 57px;
+    }
+
+    .badge-description {
+      font-weight: 400;
+      font-size: 12px !important;
+      line-height: 14px !important;
+    }
+
+  `;
+
+  const header = `
     <div class="header">
       <img class="header-img" src="https://www.dropbox.com/scl/fi/6e4bp0s93hdhk7hty4z35/header.svg?rlkey=svvz6xprj30au8yovt9xqs527&raw=true">
     </div>
-
     <div class="header-username">
-        <span class="username">${username}<br>
-            <span class="version">${downloadedOnFrenchDate}</span> 
-        </span>
-        <span class="points">${user_points}pts</span>
-    </div>
-    
-    <div class="grid">
-    ${badges.slice(i, i + 9).map(badge => {
-        if (badge.isPlaceholder) {
-            // Adjust the markup for placeholder badges here
-            return `
-            <div class="card">
-                <img src="${badge.imageUrl}" alt="Placeholder" />
-                <div style="height: 15px; width: 100%; background-color: #f0f2f5; margin: 10px 0;"></div>
-                <div style="height: 15px; width: 70%; background-color: #f0f2f5; margin: 10px auto;"></div>
-                <div style="height: 15px; width: 50%; background-color: #f0f2f5; margin: 10px auto;"></div>
-            </div>`;
-        } else {
-            // Original markup for actual badges with added status band
-            /*
-            const statusBand = badge.assertion.revoked == true ? 
-                               '<div class="status-band revoked">Révoqué</div>' :
-                               badge.assertion.revoked == 'expired' ? 
-                               '<div class="status-band expired">Expiré</div>' : '';
-            */
+      <span class="username">${username}<br>
+        <span class="version">${downloadedOnFrenchDate}</span>
+      </span>
+      <span class="points">${user_points}<span style="font-size: 10px;">&nbsp;pts</span></span>
+      
+  </div>
+  `;
 
-          console.log('🧙‍♀️', badge)
+  const footer = `
+    <div class="footer">👋 Développé pour l'Université Laval.</div>
+  `;
 
-          const statusBand = badge.revokedReason == 'expired' ? 
-                              '<div class="status-band expired">Expiré</div>' :
-                              badge.revokedReason != 'placeholder' ? 
-                              '<div class="status-band revoked">Révoqué</div>' : '';
-                                                          
-    
-            return `
-            <a href="${badge.assertion.verify.url}" target="_blank" alt="assertion">
-            <div class="card">
-                <div style="position: relative;">  <!-- wrapper for image and status band -->
-                    <img src="${badge.imageUrl}" alt="${badge.name}" />
-                    ${statusBand}
-                    <div class="point-band">${badge.assertion.points} pts</div>
-                </div>
-                <h2>${badge.name}</h2>
-                <p>🎓 <strong>Cours: </strong>${badge.assertion.course}</p>
-                <p>🗓 <strong>Date: </strong>${formatDateToFrench(badge.assertion.issuedOn)}</p>
-                <p>📦 <strong>UID: </strong> ${badge.assertion.uid}</p>
-            </div>
-            </a>`;
-        }
-    }).join('')}
+  const pages = [];
+
+  const firstPageContent = `
+    <div class="page">
+      ${header}
+      <div class="content" style="display: flex; align-items: center; justify-content: center;">
+        <img src="https://www.dropbox.com/scl/fi/wfkrnbmg6ka79mwvpkyf6/bp_cover_img.svg?rlkey=5gkuoqzd0uqih7n3nrwvtyasc&raw=true" style="width: 100%;" alt="Mon sac à dos académique">
+      </div>
     </div>
-    
-    <div class="footer">Développé pour l'Université Laval.</div>
+  `;
+
+  pages.push(firstPageContent);
+
+  for (let i = 0; i < badges.length; i += 9) {
+    const pageContent = `
+      <div class="page">
+        ${header}
+        <div class="content">
+          <div class="grid">
+          ${badges.slice(i, i + 3).map(badge => {
+            if (badge.isPlaceholder) {
+                // Adjust the markup for placeholder badges here
+                return `<div class="card" style="height:244px"></div>`;
+            } else {    
+              console.log('🧙‍♀️', badge)
+  
+              const statusBand = badge.revokedReason == 'expired' ? 
+                                  '<div class="status-band expired">Expiré</div>' :
+                                  badge.revokedReason != 'placeholder' ? 
+                                  '<div class="status-band revoked">Révoqué</div>' : '';
+                                                              
+        
+                return `
+
+                <!-- <a href="${badge.assertion.verify.url}" target="_blank" alt="assertion"> -->
+                <!-- Card -->
+                <div class="card">
+
+                    <!-- Badge container -->
+                    <div class="badge-container">
+
+                      <div class="badge-image-wrapper">
+                        <img src="${badge.imageUrl}" />
+                      </div>
+
+                      <!-- Badge informations -->
+                      <div class="badge-info">
+                        <h3>${badge.name}</h3>
+                        <p class="badge-id"><strong>Badge ID:</strong>&nbsp;<a href="#">${badge.id}</a></p>
+                        <p class="badge-description">${badge.description}</p>
+                      </div>
+
+                      <!-- Points -->
+                      <div class="badge-points">
+                        ${badge.assertion.points} pts
+                      </div>
+
+                    </div>
+
+                    <div class="attestation-container">
+
+                        <div class="attestation-info-col1">
+                          <h3>Attestation:</h3>
+                          <p>📦 <strong>ID:</strong>&nbsp;<a href="#">${badge.assertion.uid}</a></p>
+                          ${statusBand}
+                        </div>
+
+                        <div class="attestation-info-col2">
+                          <p class="indented">🎓 <strong>Cours:</strong>&nbsp;<a href="${badge.course.url}" target="_blank">${badge.course.name}</a></p>
+                          <p>🗓 <strong>Date:</strong>&nbsp;${formatDateToFrench(badge.assertion.issuedOn)}</p>
+                        </div>
+
+                        <div class="attestation-info-col3">
+
+                            <p><strong>Offert par:</strong></p>
+
+                            <!-- Issuer Logo & Details -->
+                            <a href="${badge.issuer.url}">
+                              <img src="${badge.issuer.image}" />
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        }).join('')}
+          </div>
+        </div>
+        ${footer}
+      </div>
+    `;
+    pages.push(pageContent);
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>${styles}</style>
+    </head>
+    <body>
+      ${pages.join('')}
     </body>
     </html>
   `;
-    pages.push(pageContent);
-  }
-  return pages.join('<div style="page-break-before: always;"></div>');
-}
+};
+
+
+// ****************************************
+
 
 const htmlToPdf = async (html) => {
   const browser = await puppeteer.connect({
@@ -1228,96 +1284,9 @@ async function MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, 
     return updatedPdfBuffer;
   }
 
-// ****************************************
-
-async function _MergePDF(BackpackContentPDFBuffer, username, userid, pngBuffers, configsData) {
-
-  // Step 1: Load the first PDF containing the cover and the table of contents
-    // const PdfUrl = 'https://www.dropbox.com/scl/fi/v21d3l1andv6b8vn0qrjq/backpack.pdf?rlkey=qa2wuud56pomucf7vm4ni2jsf&raw=true';
-
-    const PdfUrl = configsData.backpackPDF;
-    
-    // Step 2: Load the generated PDF and the second PDF using pdf-lib
-    const firstPdfDoc = await PDFDocument.load(BackpackContentPDFBuffer);
-    
-    const secondPdfBuffer = await fetch(PdfUrl).then(res => res.arrayBuffer());
-    const secondPdfDoc = await PDFDocument.load(secondPdfBuffer);
-
-    const pdfDoc = await PDFDocument.create();
-
-    // Copy all pages from the generated PDF and add to new PDF
-    const firstPdfPages = await pdfDoc.copyPages(secondPdfDoc, Array.from({ length: secondPdfDoc.getPageCount() }, (_, i) => i));
-    for (const page of firstPdfPages) {
-        pdfDoc.addPage(page);
-    }
-
-    // Copy all pages from the second PDF and add to new PDF
-    const secondPdfPages = await pdfDoc.copyPages(firstPdfDoc, Array.from({ length: firstPdfDoc.getPageCount() }, (_, i) => i));
-    for (const page of secondPdfPages) {
-        pdfDoc.addPage(page);
-    }
-
-    // Step 2: Insert header Image into PDF
-    /* 
-    const image = await pdfDoc.embedPng(header_img);
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-
-    // Get the width of the page
-    const pageWidth = firstPage.getWidth();
-
-    // Calculate the new height to maintain the aspect ratio
-    const aspectRatio = image.height / image.width;
-    const newHeight = pageWidth * aspectRatio;
-
-        
-    firstPage.drawImage(image, {
-      x: 0,
-      y: 678, // Adjust the y-coordinate to place the image correctly
-      width: pageWidth,
-      height: newHeight,
-    }); 
-    */
-
-    // Add metadata to the merged PDF
-    pdfDoc.setTitle(`Mon sac à dos académique | ${username}`);
-    pdfDoc.setAuthor('Université Laval');
-    pdfDoc.setSubject('Version autoportante de votre sac à dos contenant tous vos badges numériques.');
-    pdfDoc.setKeywords([`Nom: ${username}, ID: ${userid}`]);
-    pdfDoc.setCreator('Mon sac à dos académiques');
-    pdfDoc.setProducer('Université Laval');
-    pdfDoc.setLanguage('fr-CA');
-
-    // Viewer preferences
-    const viewerPrefs = pdfDoc.catalog.getOrCreateViewerPreferences(); 
-    viewerPrefs.setDisplayDocTitle(true);
-    viewerPrefs.setCenterWindow(true);
-    viewerPrefs.setFitWindow(true);
-
-    // Test to display the attachments panel by default
-    pdfDoc.catalog.set(PDFName.of('PageMode'), PDFName.of('UseAttachments'));
-
-    // Add attachments
-    for (const [filename, pngData] of Object.entries(pngBuffers)) {
-
-
-      // if we need to convert this to ArrayBuffer instead of node Buffer
-      // const imgArrayBuffer = bufferToArrayBuffer(pngData);
-      
-      await pdfDoc.attach(pngData.data, `${filename}`, {
-          description: `${pngData.name}`,
-          mimeType: 'image/png',
-      });
-  }
-
-    const updatedPdfBuffer = await pdfDoc.save();
-    return updatedPdfBuffer;
-  }
-
   function bufferToArrayBuffer(buffer) {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 }
-
 
 function formatDateToFrench(isoDate) {
   const date = new Date(isoDate);
@@ -1473,7 +1442,7 @@ app.get('/api/downloadBackpack', async (req, res) => {
     bakedBadges[assertionid] = {
      'data': bakedBadge,
      'name':  badge.name,
-     'assertion': badge.assertion
+     'assertion': badge.assertion,
     };    
   }
 
@@ -1543,52 +1512,6 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
 
 });
 
-/*
-app.get('/api/downloadBackpackFromEmail', async (req, res) => {
-
-  const token = req.query.token;
-  
-  let uid;
-  try {
-      const decodedToken = await admin.auth().verifyIdToken(token);
-      uid = decodedToken.uid;
-  } catch (error) {
-      return res.status(401).send({ error: 'You must be logged in to earn a badge.' });
-  }
-
-  // Get the user name
-  const userData = await getUserName(uid);
-  const userName = userData[0];
-  const userPoints = userData[1];
-
-  // Get all badges for the user
-  const badges = await getAllBadgesForUser(uid);
-
-  // Bake all badges
-  const bakedBadges = {};
-  for (const badge of badges) {
-    const bakedBadge = await bakeBadge(badge.assertion, badge.imageUrl);
-    
-    const assertionid = badge.assertion.uid + '.png';
-    
-    bakedBadges[assertionid] = {
-     'data': bakedBadge,
-     'name':  badge.name,
-     'assertion': badge.assertion
-    };    
-  }
-
-  const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
-  const gridPdf = await htmlToPdf(htmlGrid);
-  // const headerImg = await extractHeaderImage(htmlGrid);
-  const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges);
-
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'attachment; filename=backpack.pdf');
-  res.end(mergedPdf);
-
-});
-*/
 // ****************************************
 
 // Start the server
