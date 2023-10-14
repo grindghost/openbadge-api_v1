@@ -1187,7 +1187,7 @@ const _htmlToPdf = async (html) => {
 // Version using puppeteer-core and spartacuz
 // References:
 // https://www.stefanjudis.com/blog/how-to-use-headless-chrome-in-serverless-functions/
-const htmlToPdf = async (html) => {
+const htmlToPdf = async (html, retries = 0) => {
   
   const API_ENDPOINT = process.env.PUPPETEER_WORKER_API;
 
