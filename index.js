@@ -1209,7 +1209,7 @@ const htmlToPdf = async (html, retries = 0) => {
     if (error.response && error.response.status === 504 && retries < MAX_RETRIES) {
         console.error("Vercel tiemout error while generating PDF.");
         console.log("Retrying...", retries + 1, "of", MAX_RETRIES, "retries")
-        return htmlToPdf(htmlContent, retries + 1);
+        return htmlToPdf(html, retries + 1);
     } else {
         console.error("Error while generating PDF:", error);
         throw error;
