@@ -21,7 +21,7 @@ const fetch = require('node-fetch');
 // Node-mailer
 const SendEmail = require('./services/email');
 
-const DEV_PREFIX = 'dev';
+const DEV_PREFIX = process.env.DEV_PREFIX;
 const MAX_RETRIES = 2;
 
 // Initialize Firebase admin by providing your service account credentials from JSON file
