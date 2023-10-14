@@ -849,13 +849,8 @@ const generateHtmlGrid = (badges, username, user_points) => {
       z-index: 20;
     }
 
-    .card-2::before {
-      background: linear-gradient(rgba(255, 255, 255, 0), transparent); /* Adjust the gradient colors and transparency as needed */
-      transform-origin: top left;
-    }
-
-    .card-2::after {
-      background: linear-gradient(transparent, rgba(255, 255, 255, 0.8)); /* Adjust the gradient colors and transparency as needed */
+    .card::after {
+      background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8)); 
       transform-origin: top left;
     }
 
