@@ -827,6 +827,37 @@ const generateHtmlGrid = (badges, username, user_points) => {
       gap: 10px;
     }
 
+    .card-2 {
+      position:  relative;
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-2::before,
+    .card-2::after {
+      content: '';
+      position: absolute;
+      left: -10px;
+      right: -10px;
+      top: -30px;
+      bottom: -10px;
+      z-index: 20;
+    }
+
+    .card-2::before {
+      background: linear-gradient(rgba(255, 255, 255, 0), transparent); /* Adjust the gradient colors and transparency as needed */
+      transform-origin: top left;
+    }
+
+    .card-2::after {
+      background: linear-gradient(transparent, rgba(255, 255, 255, 0.8)); /* Adjust the gradient colors and transparency as needed */
+      transform-origin: top left;
+    }
 
     .attestation-info-col3 img {
       max-width: 80px;
@@ -1079,7 +1110,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
           ${badges.slice(i, i + 3).map(badge => {
             if (badge.isPlaceholder) {
                 // Adjust the markup for placeholder badges here
-                return `<div class="card" style="height:244px"></div>`;
+                return `<div class="card-2" style="height:244px"></div>`;
             } else {    
               console.log('🧙‍♀️', badge)
   
