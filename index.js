@@ -1054,6 +1054,16 @@ const generateHtmlGrid = (badges, username, user_points) => {
       line-height: 14px !important;
     }
 
+    @font-face {
+      font-family: 'Noto Color Emoji';
+      src: url(https://raw.githack.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf);
+    }
+
+   .emoji {
+      font-family: 'Noto Color Emoji';
+    }
+
+
   `;
 
   const header = `
@@ -1136,13 +1146,13 @@ const generateHtmlGrid = (badges, username, user_points) => {
 
                         <div class="attestation-info-col1">
                           <h3>Attestation:</h3>
-                          <p>📦 <strong>ID:</strong>&nbsp;<a href="#">${badge.assertion.uid}</a></p>
+                          <p><span class="emoji">📦</span>&nbsp;<strong>ID:</strong>&nbsp;<a href="#">${badge.assertion.uid}</a></p>
                           ${statusBand}
                         </div>
 
                         <div class="attestation-info-col2">
-                          <p class="indented">🎓 <strong>Cours:</strong>&nbsp;<a href="${badge.course.url}" target="_blank">${badge.course.name}</a></p>
-                          <p>🗓 <strong>Date:</strong>&nbsp;${formatDateToFrench(badge.assertion.issuedOn)}</p>
+                          <p class="indented"><span class="emoji">🎓</span>&nbsp;<strong>Cours:</strong>&nbsp;<a href="${badge.course.url}" target="_blank">${badge.course.name}</a></p>
+                          <p><span class="emoji">🗓</span>&nbsp;<strong>Date:</strong>&nbsp;${formatDateToFrench(badge.assertion.issuedOn)}</p>
                         </div>
 
                         <div class="attestation-info-col3">
