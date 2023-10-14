@@ -849,7 +849,7 @@ const generateHtmlGrid = (badges, username, user_points) => {
       z-index: 20;
     }
 
-    .card::after {
+    .card-2::after {
       background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8)); 
       transform-origin: top left;
     }
