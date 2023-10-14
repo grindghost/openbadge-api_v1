@@ -1184,8 +1184,8 @@ const generateHtmlGrid = (badges, username, user_points) => {
 
 // ****************************************
 
-
-const htmlToPdf = async (html) => {
+// Version using browserless.io
+const _htmlToPdf = async (html) => {
   const browser = await puppeteer.connect({
     browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
     /* args: [
@@ -1200,33 +1200,28 @@ const htmlToPdf = async (html) => {
   return pdf;
 };
 
-const extractHeaderImage = async (html) => {
-  // Step 1: Convert HTML to Image
-/*   const browser = await puppeteer.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--single-process',
-      '--no-zygote',
-    ],
-    executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
-  }); */
-  const browser = await puppeteer.launch({});
-  const page = await browser.newPage();
-  await page.setContent(html);
+const htmlToPdf = async (html) => {
+  
+  const API_ENDPOINT = process.env.PUPPETEER_WORKER_API;
 
-/* await page.setViewport({
-    width: 1920,
-    height: 1080,
-    deviceScaleFactor: 2, // Increase the device scale factor to increase the resolution
-  }); */
+  try {
+    const response = await axios.post(API_ENDPOINT, {
+      html: html
+    }, {
+      responseType: 'arraybuffer' // to handle the binary data
+    });
 
-  const elementHandle = await page.$('.header');
-  const screenshot = await elementHandle.screenshot();
-  await browser.close();
-  return screenshot;
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error('Failed to generate PDF using the custom API.');
+    }
+
+  } catch (error) {
+    console.error("Error while generating PDF:", error);
+    throw error; // or handle it accordingly
+  }
 };
-
 
 // ****************************************
 
@@ -1448,8 +1443,6 @@ app.get('/api/downloadBackpack', async (req, res) => {
 
   const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
   const gridPdf = await htmlToPdf(htmlGrid);
-  // const headerImg = await extractHeaderImage(htmlGrid);
-  // const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, headerImg);
   const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, configsData);
 
 
@@ -1503,7 +1496,6 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
 
   const htmlGrid = generateHtmlGrid(badges, userName, userPoints);
   const gridPdf = await htmlToPdf(htmlGrid);
-  // const headerImg = await extractHeaderImage(htmlGrid);
   const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, configsData);
 
   res.setHeader('Content-Type', 'application/pdf');
