@@ -428,33 +428,6 @@ async function getAllBadgesForUser(userId) {
     return userBadgesBackpack;
 }
 
-const bakeBadgeForEmail = async (emissionData, badgeImageUrl) => {
-  try {
-    const { data } = await axios.get(badgeImageUrl, { responseType: 'arraybuffer' });
-    const bufferData = Buffer.from(data);
-
-    return new Promise((resolve, reject) => {
-      bakery.bake({ image: bufferData, assertion: emissionData }, function (err, baked) {
-        if (err) {
-          reject(err);
-        }
-        // Convert the baked buffer to a base64 string
-        const base64Image = baked.toString('base64');
-       
-        // Create a data URL from the base64 string
-        // const dataURL = `${base64Image}`;
-        const dataURL = `data:image/png;base64,${base64Image}`;
-
-
-        resolve(dataURL);
-      });
-    });
-  } catch (error) {
-    throw error;
-  }
-};
-
-
 const bakeBadge = async (emissionData, badgeImageUrl) => {
   try {
     const { data } = await axios.get(badgeImageUrl, { responseType: 'arraybuffer' });
@@ -1210,6 +1183,10 @@ const _htmlToPdf = async (html) => {
   return pdf;
 };
 
+
+// Version using puppeteer-core and spartacuz
+// References:
+// https://www.stefanjudis.com/blog/how-to-use-headless-chrome-in-serverless-functions/
 const htmlToPdf = async (html) => {
   
   const API_ENDPOINT = process.env.PUPPETEER_WORKER_API;
@@ -1228,9 +1205,22 @@ const htmlToPdf = async (html) => {
     }
 
   } catch (error) {
+    if (error.response && error.response.status === 504 && retries < MAX_RETRIES) {
+        console.error("Vercel tiemout error while generating PDF.");
+        console.log("Retrying...", retries + 1, "of", MAX_RETRIES, "retries")
+        return htmlToPdf(htmlContent, retries + 1);
+    } else {
+        console.error("Error while generating PDF:", error);
+        throw error;
+    }
+}
+
+  /*
+  } catch (error) {
     console.error("Error while generating PDF:", error);
     throw error; // or handle it accordingly
   }
+  */
 };
 
 // ****************************************
