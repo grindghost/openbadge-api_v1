@@ -33,23 +33,10 @@ admin.initializeApp({
 */
 
 // Encrypt user email
-function generateSalt(length = 16) {
-  return crypto.randomBytes(length).toString('base64');
-}
-
-function hashAndEncodeEmail(email) {
-  const salt = generateSalt(); // This generates a new random salt for every call.
-  const dataToHash = `${email}${salt}`; // This appends the salt to the email.
-  const hash = crypto.createHash('sha256').update(dataToHash).digest('base64');
-  
-  // Convert the Base64 encoded hash to Base64Url format
-  const base64UrlHash = hash.replace('+', '-').replace('/', '_').replace(/=+$/, '');
-  
-  // Return both the salt and the hashed value, as you'll need to store the salt alongside the hash.
-  return {
-      salt: salt,
-      hashedEmail: base64UrlHash
-  };
+function hashEmailAddress(email, salt) {
+  var sum = crypto.createHash('sha256');
+  sum.update(email + salt);
+  return 'sha256$' + sum.digest('hex');
 }
 
 admin.initializeApp({
@@ -208,18 +195,19 @@ app.post('/api/createBadgeAssertion', async (req, res) => {
     }
 
     // Hashed the user email, and retrieve the unique salt
-    const hashedIdentity = hashAndEncodeEmail(userData.email);
-        
+    const salt = crypto.randomBytes(16).toString('hex'); // Generate a random salt
+    const hashedEmail = hashEmailAddress(userData.email, salt);
+    
     // Create a new assertion
     const newAssertion = {
         "@context": "https://w3id.org/openbadges/v2",
         "type": "Assertion",
         "uid": DEV_PREFIX + db.ref('assertions').push().key, // Creates a new key but does not send data
         "recipient": {
-            "identity": `sha256$${hashedIdentity.hashedEmail}`, // userData.email,
+            "identity": hashedEmail, // userData.email,
             "type": "email",
             "hashed": true,
-            "salt": hashedIdentity.salt
+            "salt": salt
         },
         "issuedOn": issuedOn,
         "badge": `https://backpacks3-default-rtdb.firebaseio.com/badges/${badgeId}.json`,
