@@ -1259,7 +1259,7 @@ app.get('/api/downloadBackpack', async (req, res) => {
 
 
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'attachment; filename=backpack.pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=mon_sac_a_dos_academique.pdf');
   res.end(mergedPdf);
 });
 
@@ -1311,7 +1311,7 @@ app.get('/api/downloadBackpackFromEmail', async (req, res) => {
   const mergedPdf = await MergePDF(gridPdf, userName, uid, bakedBadges, configsData);
 
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'attachment; filename=backpack.pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=mon_sac_a_dos_academique.pdf');
   res.end(mergedPdf);
 
 });
