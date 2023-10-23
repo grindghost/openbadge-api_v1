@@ -23,6 +23,7 @@
     "pdf-lib": "^1.17.1",
     "png-itxt": "^2.0.0",
     "puppeteer": "^21.1.1",
+    "qrcode": "^1.5.3",
     "streamifier": "^0.1.1"
   }
 }
