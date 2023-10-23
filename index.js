@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
 const QRCode = require('qrcode');
+const bibliography = require('./ressources/bibliographyContent.js');
+
 
 const admin = require('firebase-admin');
 
@@ -809,7 +811,22 @@ const generateHtmlGrid = (badges, username, user_points) => {
     .badge-qr img {
       max-width: 70px; /* Adjust this to your desired QR code size */
     }
+    
+  
+    .biblio-page-content {
+      height: 90%; // adjust this value as needed to prevent overflow.
+      margin: 30px 60px 14px 60px;
+      padding: 16px 60px 40px 40px;
+    }
 
+    .biblio-page-content p {
+      font-family: 'Source Sans 3';
+      font-size: 12px;
+      margin: 5px 0;
+      line-height: 1.0;
+      margin-bottom: 7px;
+    }
+  
 
   `;
 
@@ -927,6 +944,21 @@ const generateHtmlGrid = (badges, username, user_points) => {
       </div>
     `;
     pages.push(pageContent);
+  }
+
+  // ...
+  // After the generation of your normal pages.
+  const preAllocatedBiblioPages = bibliography.length; // Dynamically set based on chunks
+  for(let i = 0; i < preAllocatedBiblioPages; i++) {
+    pages.push(`
+      <div class="page">
+        ${header}
+        <div class="content biblio-page-content">
+          ${bibliography[i]}
+        </div>
+        ${footer}
+      </div>
+    `);
   }
 
   return `
